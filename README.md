@@ -2,170 +2,212 @@
 
 ### Intelligent Road Operations Assistant
 
-**Assistente inteligente para apoio às operações rodoviárias, utilizando Inteligência Artificial Generativa, processamento de linguagem natural e reconhecimento de voz.**
+**Assistente inteligente para apoio às operações rodoviárias, utilizando Inteligência Artificial Generativa, processamento de áudio e automação de registros operacionais.**
 
-O **ROUTE AI** é um projeto de Inteligência Artificial desenvolvido para explorar como modelos generativos podem auxiliar profissionais de inspeção rodoviária no registro e na consulta de informações operacionais.
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
+![Gemini](https://img.shields.io/badge/Google_Gemini-4285F4?style=flat-square&logo=google&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white)
 
-A proposta é simplificar o registro de ocorrências por meio de interações em linguagem natural, permitindo que o profissional descreva uma situação por texto ou áudio e receba automaticamente um conjunto de informações estruturadas para revisão e confirmação.
+> **Status:** MVP funcional em desenvolvimento  
+> **Contexto:** Challenge FIAP × Motiva  
+> **Área:** Generative AI | AI Engineering | Backend Development | Process Automation
 
-O projeto está sendo desenvolvido como um protótipo acadêmico, inspirado em desafios reais de operações rodoviárias, com foco em **IA aplicada, automação de processos, integração de APIs e desenvolvimento de software**.
+---
+
+## 📌 Sobre o projeto
+
+O **ROUTE AI** é um projeto de Inteligência Artificial desenvolvido no contexto do desafio acadêmico proposto pela **Motiva**, com o objetivo de explorar como agentes inteligentes podem apoiar profissionais que atuam em operações rodoviárias.
+
+A proposta surgiu de um problema prático: durante o atendimento de ocorrências, profissionais em campo precisam observar o ambiente, comunicar informações e realizar registros operacionais.
+
+Dependendo da situação, preencher manualmente esses registros pode consumir tempo e exigir interações adicionais com sistemas.
+
+O ROUTE AI busca simplificar parte desse processo por meio de uma interface que permite ao usuário **descrever uma ocorrência por voz ou texto**, enquanto a IA interpreta o relato e organiza automaticamente as informações relevantes.
+
+Antes de qualquer registro definitivo, o usuário pode revisar, corrigir e confirmar os dados.
+
+O projeto está sendo desenvolvido de forma incremental, começando por um MVP de registro inteligente de ocorrências e evoluindo futuramente para outras funcionalidades de apoio operacional.
 
 ---
 
 ## 🎯 Objetivo
 
-Desenvolver um assistente de IA capaz de apoiar o trabalho de agentes de inspeção de tráfego, reduzindo a necessidade de preenchimento manual de informações e facilitando a organização dos registros operacionais.
+Desenvolver um assistente inteligente capaz de transformar relatos em linguagem natural em registros estruturados de ocorrências rodoviárias.
 
-O ROUTE AI busca responder à seguinte questão:
+O sistema busca:
 
-> Como utilizar Inteligência Artificial Generativa e interfaces de voz para tornar o registro de ocorrências rodoviárias mais simples, estruturado e eficiente?
+- Reduzir a necessidade de digitação durante o registro de ocorrências.
+- Permitir interações por texto e áudio.
+- Interpretar informações operacionais utilizando IA generativa.
+- Identificar automaticamente rodovia, quilômetro, sentido e descrição.
+- Possibilitar revisão e confirmação humana antes do registro.
+- Armazenar ocorrências e disponibilizar um histórico consultável.
+- Servir como base para futuras funcionalidades de assistência operacional.
 
-A solução prioriza três princípios:
-
-- **Simplicidade:** interação por linguagem natural, sem exigir comandos complexos.
-- **Confiabilidade:** revisão e confirmação humana antes do registro.
-- **Rastreabilidade:** armazenamento estruturado das ocorrências para consultas posteriores.
-
-## 💡 Contexto e problema
-
-Durante atividades de inspeção rodoviária, profissionais precisam identificar situações, comunicar informações e registrar ocorrências de maneira organizada.
-
-Essas atividades podem envolver o preenchimento de campos como rodovia, quilômetro, sentido e descrição da situação encontrada.
-
-O ROUTE AI propõe utilizar IA para transformar relatos espontâneos em informações estruturadas, oferecendo apoio ao registro sem substituir a avaliação e a responsabilidade dos profissionais.
-
-**Exemplo de relato:**
-
-> "Estou na Rodovia Anhanguera, quilômetro 35, sentido capital. Encontrei um veículo parado no acostamento."
-
-**Resultado esperado:**
-
-```json
-{
-  "rodovia": "Anhanguera",
-  "km": 35,
-  "sentido": "capital",
-  "descricao": "Veículo parado no acostamento"
-}
-```
-
-Os dados são apresentados para conferência antes de serem registrados.
+**Princípio central:** a Inteligência Artificial auxilia na interpretação e organização das informações, mas não substitui o profissional nas decisões operacionais.
 
 ---
 
-## ⚙️ Funcionalidades implementadas
+## 💡 Como funciona?
 
-### 1. Interpretação de ocorrências com IA
+O usuário pode relatar uma ocorrência utilizando texto ou gravando um áudio diretamente na aplicação.
 
-A aplicação recebe relatos em linguagem natural e utiliza o Google Gemini para identificar e estruturar informações relevantes.
+**Exemplo de relato:**
 
-**Endpoint:** `POST /ocorrencias/interpretar`
+> "Estou na Rodovia Anhanguera, km 35, sentido capital. Encontrei um carro encostado no acostamento."
 
-Campos extraídos:
+A IA interpreta o relato e retorna os dados estruturados:
+
+```json
+{
+  "rodovia": "Rodovia Anhanguera",
+  "km": 35.0,
+  "sentido": "capital",
+  "descricao": "Carro encostado no acostamento"
+}
+```
+
+Essas informações são apresentadas em um formulário editável.
+
+O registro somente é enviado ao banco de dados após a confirmação explícita do usuário.
+
+Quando alguma informação não é mencionada, o sistema procura preservar sua ausência em vez de inventar um valor.
+
+---
+
+## ✅ Funcionalidades implementadas
+
+### 1. Interpretação de ocorrências por texto
+
+O usuário descreve uma situação em linguagem natural.
+
+A aplicação envia o relato para o backend, que utiliza o Google Gemini para identificar e estruturar as informações.
+
+**Campos extraídos:**
 
 - Rodovia
 - Quilômetro
 - Sentido
 - Descrição da ocorrência
 
-Quando uma informação não está presente no relato, o modelo é orientado a não inventá-la.
+### 2. Gravação de áudio pelo navegador
 
-### 2. Transcrição e interpretação de áudio
+O usuário pode gravar seu relato diretamente na interface web, utilizando o microfone do dispositivo.
 
-O sistema recebe arquivos de áudio, utiliza o Gemini para transcrever a fala e encaminha o texto resultante ao serviço de interpretação.
+Também existe a opção de enviar um arquivo de áudio.
 
-**Endpoint:** `POST /ocorrencias/audio`
+Isso evita a necessidade de gravar o relato em outro aplicativo antes de utilizá-lo no sistema.
 
-Fluxo:
+### 3. Transcrição e interpretação com IA
 
-1. Recebimento do arquivo de áudio.
-2. Transcrição da fala.
-3. Extração dos dados da ocorrência.
-4. Retorno da transcrição e dos campos estruturados.
-5. Revisão humana antes do registro.
+O áudio é encaminhado ao backend para processamento pelo Gemini.
 
-O protótipo foi testado com sucesso utilizando um arquivo `.m4a`.
+A aplicação retorna:
 
-### 3. Confirmação e registro de ocorrências
+- Transcrição do relato.
+- Dados estruturados da ocorrência.
+- Informações para revisão e confirmação.
 
-Após revisar as informações, o usuário pode confirmar o registro por meio de uma requisição específica.
+A implementação atual utiliza um fluxo otimizado que busca reduzir chamadas sequenciais ao modelo.
 
-**Endpoint:** `POST /ocorrencias/confirmar`
+### 4. Revisão e confirmação humana
 
-A confirmação é obrigatória para que os dados sejam armazenados no banco SQLite.
+Antes do registro, o usuário pode:
 
-Atualmente, essa confirmação é realizada pela documentação interativa da API (Swagger).
+- Conferir as informações identificadas pela IA.
+- Corrigir campos incorretos.
+- Complementar informações ausentes.
+- Confirmar explicitamente o registro.
 
-### 4. Consulta de ocorrências
+Essa etapa evita que a interpretação do modelo seja tratada automaticamente como um fato validado.
 
-Os registros armazenados podem ser recuperados por meio de uma rota de consulta.
+### 5. Persistência de dados com SQLite
 
-**Endpoint:** `GET /ocorrencias`
+Após a confirmação, a ocorrência é armazenada em um banco de dados SQLite.
 
-A resposta inclui a quantidade de ocorrências e seus respectivos dados, como identificador, localização, descrição e data de criação.
+Os registros possuem identificador próprio e informações associadas à ocorrência.
+
+### 6. Histórico de ocorrências
+
+A aplicação disponibiliza uma tabela com os registros armazenados.
+
+É possível consultar:
+
+- ID da ocorrência.
+- Rodovia.
+- Quilômetro.
+- Sentido.
+- Descrição.
+- Data e hora do registro.
 
 ---
 
-## 🧠 Tecnologias utilizadas
+## 🏗️ Arquitetura da solução
 
-| Tecnologia | Aplicação |
-|---|---|
-| Python | Linguagem principal do projeto |
-| FastAPI | Desenvolvimento da API REST |
-| Google Gemini | Interpretação de relatos e transcrição de áudio |
-| Google Gen AI SDK | Integração com os modelos Gemini |
-| Pydantic | Definição e validação de estruturas de dados |
-| SQLite | Armazenamento local das ocorrências |
-| Uvicorn | Execução do servidor da API |
-| python-dotenv | Carregamento das variáveis de ambiente |
-| python-multipart | Recebimento de arquivos de áudio |
+O projeto utiliza uma arquitetura cliente-servidor, separando interface, processamento e persistência.
 
-## 🏗️ Arquitetura atual
+```mermaid
+flowchart TD
+    A["Usuário / Agente de campo"] --> B["Streamlit - Interface Web"]
 
-```text
-                 AGENTE RODOVIÁRIO
-                        |
-                 Relato ou áudio
-                        |
-                        v
-                  FASTAPI (API)
-                        |
-              +---------+---------+
-              |                   |
-              v                   v
-        Relato em texto      Arquivo de áudio
-              |                   |
-              |                   v
-              |            Gemini (transcrição)
-              |                   |
-              +---------+---------+
-                        |
-                        v
-              Gemini (interpretação)
-                        |
-                        v
-              Dados estruturados
-                        |
-                        v
-                Revisão humana
-                        |
-                        v
-               Confirmação via API
-                        |
-                        v
-                  SQLite (banco)
-                        |
-                        v
-                Consulta via API
+    B --> C{"Tipo de entrada"}
+
+    C -->|Texto| D["FastAPI - Interpretar relato"]
+    C -->|Áudio| E["FastAPI - Processar áudio"]
+
+    D --> F["Google Gemini"]
+    E --> F
+
+    F --> G["Dados estruturados e transcrição"]
+
+    G --> H["Streamlit - Revisão humana"]
+
+    H --> I{"Usuário confirmou?"}
+
+    I -->|Não| J["Corrigir ou descartar"]
+    J --> H
+
+    I -->|Sim| K["FastAPI - Confirmar ocorrência"]
+    K --> L[("SQLite")]
+    L --> M["Histórico de ocorrências"]
 ```
 
-A arquitetura separa o processamento de linguagem natural da persistência dos dados, permitindo a evolução independente de cada componente.
+### Responsabilidades
 
-**Importante:** a IA auxilia na interpretação das informações, mas não realiza decisões operacionais, acionamentos de emergência ou comunicações automáticas com o Centro de Controle Operacional (CCO).
+| Componente | Responsabilidade |
+|---|---|
+| Streamlit | Interface web, entrada de dados, gravação de áudio e revisão |
+| FastAPI | Endpoints, validação, integração com serviços e persistência |
+| Google Gemini | Transcrição, interpretação e extração estruturada |
+| Pydantic | Definição e validação dos modelos de dados |
+| SQLite | Armazenamento das ocorrências confirmadas |
+| Requests | Comunicação HTTP entre Streamlit e FastAPI |
 
 ---
 
-## 📂 Estrutura do projeto
+## 🛠️ Tecnologias utilizadas
+
+**Python:** linguagem principal do projeto.
+
+**FastAPI:** framework utilizado na construção do backend e dos endpoints REST.
+
+**Streamlit:** framework responsável pela interface web interativa.
+
+**Google Gemini API:** modelo generativo utilizado no processamento dos relatos.
+
+**Pydantic:** validação e estruturação dos dados recebidos e retornados pela API.
+
+**SQLite:** banco de dados relacional utilizado na persistência local.
+
+**python-dotenv:** carregamento de variáveis de ambiente, incluindo credenciais da API.
+
+---
+
+## 📁 Estrutura do projeto
+
+Estrutura principal da aplicação:
 
 ```text
 route-ai/
@@ -177,46 +219,42 @@ route-ai/
 │   ├── voice_service.py
 │   └── database.py
 │
+├── streamlit_app.py
+├── requirements.txt
 ├── .env
 ├── .gitignore
-├── requirements.txt
 ├── README.md
 └── route_ai.db
 ```
 
 **Descrição dos arquivos:**
 
-- `main.py`: definição das rotas da API.
-- `ai_service.py`: integração com o Gemini para interpretar relatos.
-- `voice_service.py`: transcrição de arquivos de áudio.
-- `database.py`: criação, gravação e consulta de registros no SQLite.
-- `.env`: configuração local da chave de API.
+- `main.py`: endpoints e regras da API.
+- `ai_service.py`: interpretação de relatos e extração de informações.
+- `voice_service.py`: processamento de áudio com IA.
+- `database.py`: inicialização do banco, persistência e consultas.
+- `streamlit_app.py`: interface da aplicação.
 - `requirements.txt`: dependências do projeto.
-- `route_ai.db`: banco SQLite criado localmente.
+- `.env`: variáveis de ambiente locais.
 
-O arquivo `.env`, o ambiente virtual e o banco local não devem ser enviados ao repositório.
+O arquivo `.env` e o banco local não devem ser publicados com dados sensíveis ou credenciais.
 
 ---
 
-## 🚀 Como executar localmente
+## 🚀 Executando o projeto localmente
 
 ### Pré-requisitos
 
 - Python instalado.
-- Git instalado (para clonar o repositório).
 - Chave de API do Google Gemini.
-- Acesso à internet para utilizar os serviços do Gemini.
+- Dependências Python do projeto.
 
-### 1. Obter o projeto
-
-Clone o repositório quando estiver publicado:
+### 1. Clonar o repositório
 
 ```bash
-git clone URL_DO_REPOSITORIO
-cd route-ai
+git clone <URL_DO_REPOSITORIO>
+cd <PASTA_DO_PROJETO>
 ```
-
-Ou abra a pasta do projeto diretamente no VS Code.
 
 ### 2. Criar o ambiente virtual
 
@@ -233,158 +271,204 @@ No Windows (PowerShell):
 ### 3. Instalar as dependências
 
 ```bash
-python -m pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
-### 4. Configurar a API do Gemini
+### 4. Configurar as variáveis de ambiente
 
-Crie um arquivo `.env` na pasta principal do projeto:
+Crie um arquivo `.env` na raiz do projeto:
 
-```dotenv
-GEMINI_API_KEY=SUA_CHAVE_AQUI
+```env
+GEMINI_API_KEY=sua_chave_aqui
 ```
 
-A chave pode ser gerada no [Google AI Studio](https://aistudio.google.com/apikey).
+**Importante:** nunca publique sua chave de API no GitHub.
 
-**Nunca publique sua chave de API no GitHub.**
+### 5. Iniciar o backend
 
-### 5. Iniciar o servidor
+No terminal:
 
 ```bash
-python -m uvicorn app.main:app --reload
+uvicorn app.main:app --reload
 ```
 
-Acesse a documentação interativa:
+A API estará disponível em:
 
-**http://127.0.0.1:8000/docs**
+```text
+http://127.0.0.1:8000
+```
+
+A documentação interativa do FastAPI poderá ser acessada em:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+### 6. Iniciar a interface web
+
+Em outro terminal, com o ambiente virtual ativado:
+
+```bash
+streamlit run streamlit_app.py
+```
+
+A aplicação será aberta no navegador, normalmente em:
+
+```text
+http://localhost:8501
+```
+
+---
+
+## 🔌 Endpoints da API
+
+| Método | Endpoint | Descrição |
+|---|---|---|
+| GET | `/` | Verifica a disponibilidade da API |
+| POST | `/ocorrencias/interpretar` | Interpreta um relato textual |
+| POST | `/ocorrencias/audio` | Processa áudio e retorna informações extraídas |
+| POST | `/ocorrencias/confirmar` | Registra uma ocorrência confirmada |
+| GET | `/ocorrencias` | Lista ocorrências armazenadas |
+
+O endpoint de confirmação exige autorização explícita no corpo da requisição por meio do campo `confirmado`.
 
 ---
 
 ## 🧪 Testes realizados
 
-Até o momento, foram realizados testes manuais utilizando o Swagger UI.
+Durante o desenvolvimento, foram realizados testes para verificar o comportamento da aplicação e corrigir problemas de integração.
 
-| Funcionalidade | Resultado |
+Entre os cenários trabalhados estão:
+
+- Interpretação de relatos textuais.
+- Extração de informações estruturadas.
+- Gravação de áudio pelo navegador.
+- Processamento de arquivos de áudio.
+- Validação dos campos recebidos pelo backend.
+- Tratamento de informações ausentes.
+- Confirmação e armazenamento de ocorrências.
+- Consulta ao histórico de registros.
+
+### Teste de processamento de áudio
+
+Em um dos testes mais recentes, foi utilizada uma gravação de aproximadamente **8 segundos**.
+
+**Resultado observado:**
+
+| Métrica | Resultado |
 |---|---|
-| Inicialização da API FastAPI | Concluído |
-| Interpretação de relato textual com Gemini | Concluído |
-| Registro de ocorrência no SQLite | Concluído |
-| Consulta de ocorrência armazenada | Concluído |
-| Transcrição de arquivo `.m4a` | Concluído |
-| Extração de dados a partir de áudio | Concluído |
+| Duração do áudio | 8 segundos |
+| Tempo total de processamento | 22,01 segundos |
+| Resposta da API | HTTP 200 OK |
+| Transcrição | Realizada |
+| Extração estruturada | Realizada |
+| Revisão dos dados | Disponibilizada |
 
-### Exemplo de teste por áudio
+O teste demonstrou o funcionamento do fluxo de áudio até a etapa de revisão.
 
-Durante um teste, o sistema recebeu um relato sobre um veículo parado na Rodovia Anhanguera, quilômetro 35, sentido capital.
+Entretanto, a latência ainda precisa ser avaliada em múltiplas execuções, e a confirmação de persistência deve ser novamente validada após a otimização do processamento.
 
-A API retornou uma transcrição e os seguintes dados:
-
-```json
-{
-  "status": "aguardando_confirmacao",
-  "dados": {
-    "rodovia": "Anhanguera",
-    "km": 35,
-    "sentido": "capital",
-    "descricao": "veículo parado no acostamento"
-  }
-}
-```
-
-O teste retornou **HTTP 200 OK**, demonstrando o funcionamento da integração entre recebimento de áudio, transcrição e interpretação.
-
-Esses testes comprovam o funcionamento dos fluxos básicos em ambiente local, mas não representam uma validação completa para utilização operacional.
+**Observação:** esses resultados representam um teste específico, não uma média de desempenho ou benchmark definitivo.
 
 ---
 
 ## 🗺️ Roadmap de desenvolvimento
 
-### Fase 1 — Backend e IA
+### Fase 1 — MVP de registro inteligente
 
-- [x] Configuração do ambiente Python.
-- [x] Criação da API com FastAPI.
-- [x] Integração com Google Gemini.
-- [x] Interpretação de relatos em linguagem natural.
-- [x] Criação do banco SQLite.
-- [x] Registro mediante confirmação.
-- [x] Consulta de ocorrências.
-- [x] Transcrição e interpretação de áudio.
+- [x] Estruturar backend com FastAPI.
+- [x] Integrar modelo generativo.
+- [x] Interpretar relatos por texto.
+- [x] Extrair dados estruturados.
+- [x] Criar interface com Streamlit.
+- [x] Implementar confirmação humana.
+- [x] Persistir ocorrências com SQLite.
+- [x] Criar histórico de registros.
 
-### Fase 2 — Interface visual
+### Fase 2 — Interação por voz
 
-- [ ] Criar interface com Streamlit.
-- [ ] Integrar envio de áudio pela interface.
-- [ ] Permitir entrada de relatos por texto.
-- [ ] Exibir os dados extraídos para revisão.
-- [ ] Permitir correção dos campos antes da confirmação.
-- [ ] Integrar o registro ao SQLite.
-- [ ] Exibir histórico de ocorrências.
+- [x] Implementar upload de áudio.
+- [x] Permitir gravação diretamente pelo navegador.
+- [x] Integrar transcrição e interpretação com IA.
+- [x] Implementar fluxo otimizado de processamento.
+- [ ] Validar integralmente a persistência após o fluxo otimizado.
+- [ ] Realizar testes comparativos de latência.
+- [ ] Melhorar feedback visual durante o processamento.
+- [ ] Avaliar estratégias adicionais de redução de latência.
 
 ### Fase 3 — Evolução do assistente
 
-- [ ] Consulta a procedimentos operacionais autorizados.
-- [ ] Avaliação de RAG para recuperação de documentos.
-- [ ] Melhoria da validação dos dados extraídos.
-- [ ] Implementação de autenticação e controle de acesso.
-- [ ] Ampliação de logs e rastreabilidade.
-- [ ] Avaliação de alternativas para funcionamento com conectividade limitada.
-- [ ] Testes automatizados e tratamento avançado de erros.
-- [ ] Preparação para demonstração e disponibilização da aplicação.
+- [ ] Consultar procedimentos operacionais aprovados.
+- [ ] Implementar recuperação de conhecimento com RAG.
+- [ ] Ampliar o suporte a comandos de voz.
+- [ ] Implementar autenticação e controle de acesso.
+- [ ] Melhorar rastreabilidade e auditoria das ações.
+- [ ] Avaliar suporte a conectividade instável e operação offline limitada.
+- [ ] Integrar futuramente sistemas operacionais autorizados.
+
+### Fase 4 — Produto e apresentação
+
+- [ ] Aprimorar a experiência da interface.
+- [ ] Criar testes automatizados.
+- [ ] Documentar métricas e limitações.
+- [ ] Preparar uma demonstração do sistema.
+- [ ] Avaliar possibilidades de deploy.
+- [ ] Documentar arquitetura e decisões técnicas.
 
 ---
 
-## 🔒 Segurança e limitações
+## 🔐 Segurança e responsabilidade
 
-O ROUTE AI é atualmente um **protótipo acadêmico em desenvolvimento**.
+O ROUTE AI foi concebido como uma ferramenta de apoio ao profissional, não como um sistema autônomo de tomada de decisões operacionais.
 
-As principais limitações são:
+No MVP atual, o registro depende da confirmação humana.
 
-- O processamento com Gemini depende de conexão com a internet.
-- A aplicação ainda não possui autenticação de usuários.
-- A confirmação humana é realizada por meio de requisições à API.
-- A transcrição e a interpretação podem apresentar erros.
-- O sistema não está integrado aos sistemas operacionais da Motiva.
-- Não há validação para uso em operações rodoviárias reais.
-- O funcionamento offline ainda não foi implementado.
+Para uma eventual utilização em ambiente real, ainda seriam necessários mecanismos adicionais, como autenticação, autorização, auditoria, proteção de dados, integração segura com sistemas corporativos e validação operacional.
 
-O projeto adota como princípio que informações interpretadas por IA devem ser verificadas antes do registro definitivo.
+O sistema não realiza automaticamente acionamento de equipes de emergência, despacho de recursos ou decisões críticas.
 
-**Não utilizar dados operacionais sensíveis ou gravações reais sem autorização e controles adequados.**
+A operação centralizada do Centro de Controle Operacional (CCO) não faz parte do escopo implementado neste MVP.
+
+---
+
+## 📚 Aprendizados técnicos
+
+O desenvolvimento do ROUTE AI permite aplicar conhecimentos de:
+
+- Engenharia de software com Python.
+- Construção e consumo de APIs REST.
+- Integração com modelos de linguagem.
+- Processamento de áudio com IA generativa.
+- Extração estruturada de informações.
+- Validação de dados com Pydantic.
+- Persistência em bancos relacionais.
+- Tratamento de erros HTTP e exceções.
+- Gerenciamento de estado em aplicações Streamlit.
+- Medição e otimização de latência.
+- Desenvolvimento incremental e depuração de sistemas.
+
+Além da integração com IA, o projeto envolve desafios práticos de engenharia, especialmente na comunicação entre componentes, no tratamento de dados incompletos e na confiabilidade do fluxo de registro.
 
 ---
 
 ## 🎓 Contexto acadêmico
 
-O ROUTE AI está sendo desenvolvido como projeto acadêmico voltado à aplicação prática de Inteligência Artificial Generativa em um cenário de operações rodoviárias.
+O ROUTE AI está sendo desenvolvido como projeto acadêmico no contexto do **Challenge FIAP × Motiva**.
 
-A solução é inspirada no desafio proposto pela **Motiva**, com foco em interfaces de voz, automação de registros e apoio a profissionais em campo.
+A solução busca explorar aplicações de Inteligência Artificial Generativa para apoiar profissionais em operações rodoviárias.
 
-O desenvolvimento permite explorar conceitos de:
-
-- Inteligência Artificial Generativa e modelos de linguagem.
-- Processamento de linguagem natural.
-- Reconhecimento e transcrição de voz.
-- Desenvolvimento de APIs REST.
-- Modelagem e persistência de dados.
-- Arquitetura de sistemas inteligentes.
-- Human-in-the-loop (validação humana).
-
-Este repositório representa um trabalho acadêmico independente, não um produto oficial ou sistema operacional da Motiva.
+O desenvolvimento apresentado neste repositório é um protótipo acadêmico e não representa uma solução oficialmente implantada nos sistemas da Motiva.
 
 ---
 
-## 📌 Status do projeto
+## 📌 Status atual
 
-**Em desenvolvimento — Backend funcional, interface visual planejada.**
+O ROUTE AI possui um MVP funcional, executado localmente, que demonstra a integração entre interface web, backend, IA generativa e banco de dados.
 
-O próximo marco é a implementação de uma interface com Streamlit, permitindo utilizar os recursos existentes de forma mais intuitiva, sem depender diretamente do Swagger.
+O foco atual do desenvolvimento é **melhorar a confiabilidade e a velocidade do processamento de áudio**, validar o fluxo completo após as otimizações e evoluir a experiência do usuário.
 
----
-
-## 📄 Licença
-
-Licença ainda não definida.
+O projeto continuará sendo atualizado conforme novas funcionalidades forem desenvolvidas, implementadas e testadas.
 
 ---
 
-**ROUTE AI — Transformando relatos em informações estruturadas com Inteligência Artificial.**
+**ROUTE AI — Exploring how Generative AI can support real-world operations.**
