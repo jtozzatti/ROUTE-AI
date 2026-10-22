@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import time
 
 # ==========================================
 # CONFIGURACAO DA APLICACAO
@@ -31,10 +32,20 @@ def mostrar_erro_api(erro, mensagem):
         st.caption(str(erro))
 
 
+
 def processar_audio(arquivo):
-    """Envia audio gravado ou carregado para a API existente."""
+    """Envia áudio gravado ou carregado para a API."""
+
     try:
-        with st.spinner("Transcrevendo e interpretando o áudio..."):
+        # Inicia a medição do tempo
+        inicio = time.perf_counter()
+
+        # Exibe feedback enquanto a IA processa o áudio
+        with st.spinner(
+            "🤖 Analisando ocorrência com IA... "
+            "Transcrevendo áudio e identificando informações.",
+            show_time=True
+        ):
             resposta = requests.post(
                 f"{API_URL}/ocorrencias/audio",
                 files={
@@ -44,9 +55,13 @@ def processar_audio(arquivo):
                         arquivo.type or "audio/wav",
                     )
                 },
-                timeout=120,
+                timeout=180,
             )
+
             resposta.raise_for_status()
+
+        # Calcula o tempo total da solicitação
+        tempo_total = time.perf_counter() - inicio
 
         resultado = resposta.json()
         dados = resultado["dados"]
@@ -57,12 +72,23 @@ def processar_audio(arquivo):
 
         st.session_state["ocorrencia"] = dados
         st.session_state["transcricao"] = transcricao
+
         st.success("Áudio processado com sucesso!")
 
+        st.caption(
+            f"⏱️ Tempo de processamento: {tempo_total:.2f} segundos"
+        )
+
     except requests.exceptions.RequestException as erro:
-        mostrar_erro_api(erro, "Não foi possível processar o áudio.")
+        mostrar_erro_api(
+            erro,
+            "Não foi possível processar o áudio."
+        )
+
     except (ValueError, KeyError, TypeError):
-        st.error("A API retornou uma resposta em formato inesperado.")
+        st.error(
+            "A API retornou uma resposta em formato inesperado."
+        )
 
 
 # ==========================================

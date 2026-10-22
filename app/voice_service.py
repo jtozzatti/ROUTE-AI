@@ -5,19 +5,31 @@ import time
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-from google.genai.errors import ServerError
+from google.genai.errors import ServerError, ClientError
 
 from app.ai_service import ResultadoAudio
 
 
-# Carrega as variáveis de ambiente
+# ==========================================
+# CONFIGURAÇÃO DO GEMINI
+# ==========================================
+
 load_dotenv()
 
-# Configura o cliente Gemini
 client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY")
 )
 
+# Modelos utilizados no processamento
+MODELOS = [
+    "gemini-3.8-flash",
+    "gemini-3.7-flash"
+]
+
+
+# ==========================================
+# PROCESSAMENTO INTELIGENTE DE ÁUDIO
+# ==========================================
 
 def processar_audio_com_ia(
     audio: bytes,
@@ -25,25 +37,36 @@ def processar_audio_com_ia(
 ) -> ResultadoAudio:
     """
     Transcreve e interpreta o áudio em uma única
-    chamada ao Gemini.
+    chamada por modelo.
+
+    Se o modelo principal estiver indisponível,
+    tenta automaticamente o modelo alternativo.
     """
 
     if not audio:
         raise ValueError("O arquivo de áudio está vazio.")
 
-    # Normaliza o formato recebido
+    # Normaliza o formato do áudio
     mime_type = (mime_type or "audio/wav").split(";")[0].lower()
 
     if mime_type in ("audio/x-wav", "audio/wave"):
         mime_type = "audio/wav"
 
-    max_tentativas = 3
     inicio_total = time.perf_counter()
 
-    for tentativa in range(1, max_tentativas + 1):
+    # Percorre os modelos disponíveis
+    for indice, modelo in enumerate(MODELOS, start=1):
+
         try:
+            inicio_modelo = time.perf_counter()
+
+            print(
+                f"PROCESSANDO ÁUDIO COM: {modelo}",
+                flush=True
+            )
+
             resposta = client.models.generate_content(
-                model="gemini-3.8-flash",
+                model=modelo,
                 contents=[
                     (
                         "Analise este áudio de uma ocorrência "
@@ -72,7 +95,6 @@ def processar_audio_com_ia(
                     "O Gemini não retornou uma resposta."
                 )
 
-            # Valida a transcrição e os campos extraídos
             resultado = ResultadoAudio.model_validate_json(
                 resposta.text
             )
@@ -82,26 +104,41 @@ def processar_audio_com_ia(
                     "O Gemini retornou uma transcrição vazia."
                 )
 
+            tempo_modelo = time.perf_counter() - inicio_modelo
             tempo_total = time.perf_counter() - inicio_total
 
             print(
-                f"TEMPO ÁUDIO COMPLETO: "
-                f"{tempo_total:.2f} segundos",
+                f"MODELO UTILIZADO: {modelo}",
+                flush=True
+            )
+
+            print(
+                f"TEMPO DO MODELO: {tempo_modelo:.2f} segundos",
+                flush=True
+            )
+
+            print(
+                f"TEMPO ÁUDIO COMPLETO: {tempo_total:.2f} segundos",
                 flush=True
             )
 
             return resultado
 
-        except ServerError as erro:
+        except (ServerError, ClientError) as erro:
+
             print(
-                f"GEMINI INDISPONÍVEL: "
-                f"tentativa {tentativa}/{max_tentativas}: "
-                f"{erro}",
+                f"MODELO INDISPONÍVEL: {modelo} "
+                f"({indice}/{len(MODELOS)}): {erro}",
                 flush=True
             )
 
-            if tentativa == max_tentativas:
-                raise
+            # Se ainda existe outro modelo, tenta o próximo
+            if indice < len(MODELOS):
+                print(
+                    "ATIVANDO MODELO ALTERNATIVO...",
+                    flush=True
+                )
+                continue
 
-            tempo_espera = 2 * tentativa
-            time.sleep(tempo_espera)
+            # Todos os modelos falharam
+            raise

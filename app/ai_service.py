@@ -36,7 +36,7 @@ def interpretar_ocorrencia(relato: str) -> DadosOcorrencia:
     inicio = time.perf_counter()
 
     # Número máximo de tentativas
-    max_tentativas = 3
+    max_tentativas = 2
 
     for tentativa in range(1, max_tentativas + 1):
 
@@ -91,7 +91,7 @@ def interpretar_ocorrencia(relato: str) -> DadosOcorrencia:
                 raise
 
             # Aguarda antes de tentar novamente
-            tempo_espera = 2 ** tentativa
+            tempo_espera = 1
 
             print(
                 f"Nova tentativa em {tempo_espera} segundos...",
